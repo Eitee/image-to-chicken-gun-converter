@@ -25,7 +25,7 @@
     
     <div class="instrucciones" id="instructions">
         Upload your image here to use it in Chicken Gun. 
-        <br>Inside the game, go to <b>"Load Model"</b>, select the file, and your image will be in the game!
+        <br>Inside the game, go to <b>"Load 3D Model"</b>, select the file, and your image will be in the game!
     </div>
     
     <input type="file" id="imageInput" accept="image/png, image/jpeg">
@@ -41,21 +41,21 @@
         const translations = {
             en: {
                 title: "Convert Image For Chicken Gun!",
-                instr: 'Upload your image here to use it in Chicken Gun. <br>Inside the game, go to <b>"Load Model"</b>, select the file, and your image will be in the game!',
+                instr: 'Upload your image here to use it in Chicken Gun. <br>Inside the game, go to <b>"Load 3D Model"</b>, select the file, and your image will be in the game!',
                 btn: "CONVERT IMAGE TO CHICKEN GUN",
                 status: "Image converted! Thanks for using",
                 madeBy: "Made by"
             },
             es: {
                 title: "¡Convertir Imagen Para Chicken Gun!",
-                instr: 'Coloca tu imagen aquí y automáticamente la podrás usar en Chicken Gun. <br>Dentro del juego, le das a <b>"Load Model"</b>, seleccionas el archivo y ¡ya tendrás tu imagen dentro de Chicken Gun!',
+                instr: 'Coloca tu imagen aquí y automáticamente la podrás usar en Chicken Gun. <br>Dentro del juego, le das a <b>"Load 3D Model"</b>, seleccionas el archivo y ¡ya tendrás tu imagen dentro de Chicken Gun!',
                 btn: "CONVERTIR IMAGEN A CHICKEN GUN",
                 status: "¡Imagen convertida! Gracias por usar",
                 madeBy: "Hecho por"
             },
             ru: {
                 title: "Конвертировать изображение для Chicken Gun!",
-                instr: 'Загрузите изображение здесь, чтобы использовать его в Chicken Gun. <br>В игре нажмите <b>"Load Model"</b>, выберите файл, и ваше изображение появится в игре!',
+                instr: 'Загрузите изображение здесь, чтобы использовать его в Chicken Gun. <br>В игре нажмите <b>"Load 3D Model"</b>, выберите файл, и ваше изображение появится в игре!',
                 btn: "КОНВЕРТИРОВАТЬ В CHICKEN GUN",
                 status: "Изображение конвертировано! Спасибо за использование",
                 madeBy: "Сделано"
@@ -70,7 +70,6 @@
         document.getElementById('downloadBtn').innerText = translations[lang].btn;
         document.getElementById('statusMsg').innerText = translations[lang].status;
         
-        // CORRECCIÓN AQUÍ: Aseguramos que el elemento exista antes de traducir
         const footerLabel = document.getElementById('footerLabel');
         if(footerLabel) footerLabel.innerText = translations[lang].madeBy;
 
