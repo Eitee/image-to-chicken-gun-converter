@@ -69,7 +69,10 @@
         document.getElementById('instructions').innerHTML = translations[lang].instr;
         document.getElementById('downloadBtn').innerText = translations[lang].btn;
         document.getElementById('statusMsg').innerText = translations[lang].status;
-        document.getElementById('footerLabel').innerText = translations[lang].madeBy;
+        
+        // CORRECCIÓN AQUÍ: Aseguramos que el elemento exista antes de traducir
+        const footerLabel = document.getElementById('footerLabel');
+        if(footerLabel) footerLabel.innerText = translations[lang].madeBy;
 
         let currentBlobUrl = null;
 
