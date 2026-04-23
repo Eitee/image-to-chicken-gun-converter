@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertidor Chicken Gun</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/GLTFExporter.js"></script>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 40px 20px; 
+            background-color: #1a1a1a; 
+            color: #ffffff; 
+            text-align: center; 
+        }
+        h1 { color: #f1c40f; text-transform: uppercase; letter-spacing: 2px; text-shadow: 2px 2px #000; }
+        .instrucciones { 
+            background: #333; 
+            padding: 20px; 
+            border-radius: 10px; 
+            max-width: 600px; 
+            margin: 20px auto; 
+            line-height: 1.6;
+            border: 1px solid #444;
+        }
+        .btn { 
+            display: inline-block; 
+            padding: 18px 30px; 
+            background: #27ae60; 
+            color: white; 
+            border-radius: 50px; 
+            font-weight: bold; 
+            margin-top: 25px; 
+            display: none; 
+            text-decoration: none;
+            font-size: 1.1em;
+            box-shadow: 0 4px #1e8449;
+            cursor: pointer;
+        }
+        .btn:active { transform: translateY(2px); box-shadow: 0 2px #1e8449; }
+        input[type="file"] { 
+            background: #f1c40f; 
+            padding: 15px; 
+            border-radius: 5px; 
+            color: #000; 
+            font-weight: bold;
+            cursor: pointer;
+        }
+        #statusMsg {
+            margin-top: 20px;
+            color: #2ecc71;
+            font-weight: bold;
+            display: none;
+            font-size: 1.2em;
+        }
+        footer { margin-top: 50px; color: #777; font-size: 1.1em; }
+        footer a { color: #f1c40f; text-decoration: none; font-weight: bold; }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <h1>¡Convertir Imagen Para Chicken Gun!</h1>
+    
+    <div class="instrucciones">
+        Coloca tu imagen aquí y automáticamente la podrás usar en Chicken Gun. 
+        <br>Lo que te dé, le das en <b>"Import Model"</b> y ahí te saldrá.
+    </div>
+    
+    <input type="file" id="imageInput" accept="image/png, image/jpeg">
+    <br>
+    
+    <a id="downloadBtn" class="btn">CONVERTIR IMAGEN A CHICKEN GUN</a>
+
+    <div id="statusMsg">¡Imagen convertida! Gracias por usar</div>
+
+    <canvas id="conversionCanvas" style="display:none;"></canvas>
+
+    <script>
+        let currentBlobUrl = null;
+
+        document.getElementById('imageInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('downloadBtn').style.display = 'none';
+            document.getElementById('statusMsg').style.display = 'none';
+
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+            
+            img.onload = function() {
+                const canvas = document.getElementById('conversionCanvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+
+                const processedTexture = new THREE.CanvasTexture(canvas);
+                const scene = new THREE.Scene();
+                const aspect = img.width / img.height;
+                const geometry = new THREE.BoxGeometry(aspect, 1, 0.15);
+                const material = new THREE.MeshBasicMaterial({ map: processedTexture, transparent: false });
+                const edgeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const materials = [edgeMat, edgeMat, edgeMat, edgeMat, material, material];
+                const mesh = new THREE.Mesh(geometry, materials);
+                mesh.name = "Cube"; 
+                scene.add(mesh);
+
+                const exporter = new THREE.GLTFExporter();
+                exporter.parse(scene, function(gltf) {
+                    const blob = new Blob([gltf], { type: 'model/gltf-binary' });
+                    currentBlobUrl = URL.createObjectURL(blob);
+                    
+                    const btn = document.getElementById('downloadBtn');
+                    const originalName = file.name.replace(/\.[^/.]+$/, "");
+                    btn.download = originalName + " (Chicken Gun Image).glb";
+                    
+                    btn.style.display = 'inline-block';
+                }, { binary: true });
+            };
+        });
+
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            this.href = currentBlobUrl;
+            document.getElementById('statusMsg').style.display = 'block';
+        });
+    </script>
+
+    <footer>
+        Hecho por <a href="https://youtube.com/@eiteeyt?si=akPUdnEfXM-oORH5" target="_blank">Eitee</a> <333
+    </footer>
+
+</body>
+</html>
