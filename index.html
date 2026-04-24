@@ -25,7 +25,8 @@
 
     <h1 id="title">CONVERTIR IMAGEN A CHICKEN GUN</h1>
     
-    <div class="instrucciones" id="instructions"></div>
+    <div class="instrucciones" id="instructions">
+        </div>
     
     <input type="file" id="imageInput" accept="image/png, image/jpeg, image/gif">
     <div id="gifDisclaimer" class="disclaimer"></div>
@@ -81,6 +82,9 @@
         document.getElementById('instructions').innerHTML = translations[lang].instr;
         document.getElementById('downloadBtn').innerText = translations[lang].btn;
         document.getElementById('gifDisclaimer').innerText = translations[lang].disclaimer;
+        
+        const footerLabel = document.getElementById('footerLabel');
+        if(footerLabel) footerLabel.innerText = translations[lang].madeBy;
 
         let currentBlobUrl = null;
         let isGif = false;
@@ -102,9 +106,10 @@
         });
 
         function processStaticImage(file) {
+            // MOSTRAR ESTADO DE PROCESAMIENTO PARA IMAGEN
             const btn = document.getElementById('downloadBtn');
             btn.innerText = translations[lang].processing_img;
-            btn.style.background = "#e67e22";
+            btn.style.background = "#e67e22"; // Naranja
             btn.style.pointerEvents = "none";
             btn.style.display = 'inline-block';
 
@@ -124,7 +129,7 @@
                 const scene = new THREE.Scene();
                 const aspect = img.width / img.height;
                 const geometry = new THREE.BoxGeometry(aspect, 1, 0.15);
-                const material = new THREE.MeshBasicMaterial({ map: processedTexture });
+                const material = new THREE.MeshBasicMaterial({ map: processedTexture, transparent: false });
                 const edgeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
                 const materials = [edgeMat, edgeMat, edgeMat, edgeMat, material, material];
                 const mesh = new THREE.Mesh(geometry, materials);
@@ -135,9 +140,13 @@
                 exporter.parse(scene, function(gltf) {
                     const blob = new Blob([gltf], { type: 'model/gltf-binary' });
                     currentBlobUrl = URL.createObjectURL(blob);
-                    btn.download = file.name.replace(/\.[^/.]+$/, "") + " (ChickenGunImage).glb";
+                    
+                    const originalName = file.name.replace(/\.[^/.]+$/, "");
+                    btn.download = originalName + " (ChickenGunImage).glb";
+                    
+                    // VOLVER AL ESTADO DE DESCARGA
                     btn.style.pointerEvents = "auto";
-                    btn.style.background = "#27ae60";
+                    btn.style.background = "#27ae60"; // Verde
                     btn.innerText = translations[lang].btn;
                 }, { binary: true });
             };
@@ -161,68 +170,73 @@
             
             gifPlayer.load(function() {
                 const length = gifPlayer.get_length();
-                const frames = gifPlayer.get_frames(); // Obtener datos de cuadros reales
                 const scene = new THREE.Scene();
                 const rootGroup = new THREE.Group();
                 rootGroup.name = "AnimatedGIF";
                 scene.add(rootGroup);
 
                 const tracks = [];
-                let currentTime = 0;
+                const frameDelay = 0.1; 
+                const totalDuration = length * frameDelay;
 
+                gifPlayer.move_to(0);
                 const canvasW = gifPlayer.get_canvas().width;
                 const canvasH = gifPlayer.get_canvas().height;
                 const aspect = canvasW / canvasH;
                 const geometry = new THREE.BoxGeometry(aspect, 1, 0.15);
                 const edgeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
-                // Primero calculamos la duración total sumando cada delay real
-                let totalDuration = 0;
-                frames.forEach(f => {
-                    totalDuration += (f.delay / 100); // El delay viene en centésimas de segundo
-                });
-
                 for(let i = 0; i < length; i++) {
-                    const frameData = frames[i];
-                    const frameDelay = frameData.delay / 100; // Convertir a segundos
-
+                    gifPlayer.move_to(i);
                     const frameCanvas = document.createElement('canvas');
                     frameCanvas.width = canvasW;
                     frameCanvas.height = canvasH;
                     const fCtx = frameCanvas.getContext('2d');
+                    
                     fCtx.fillStyle = "#FFFFFF";
                     fCtx.fillRect(0, 0, canvasW, canvasH);
-                    fCtx.drawImage(frameData.dims.left, frameData.dims.top); // Usar el frame extraído directamente
+                    fCtx.drawImage(gifPlayer.get_canvas(), 0, 0);
 
                     const tex = new THREE.CanvasTexture(frameCanvas);
-                    const material = new THREE.MeshBasicMaterial({ map: tex });
+                    const material = new THREE.MeshBasicMaterial({ map: tex, transparent: false });
                     const materials = [edgeMat, edgeMat, edgeMat, edgeMat, material, material];
 
                     const mesh = new THREE.Mesh(geometry, materials);
                     mesh.name = "Frame_" + i;
-                    mesh.scale.set(0.001, 0.001, 0.001);
+                    
+                    if(i > 0) mesh.scale.set(0.001, 0.001, 0.001);
                     mesh.position.z = i * 0.0001; 
+
                     rootGroup.add(mesh);
 
-                    // Animación basada en el tiempo real del GIF
-                    const t = [0, currentTime, currentTime + frameDelay, totalDuration];
-                    const v = [0.001,0.001,0.001, 1,1,1, 0.001,0.001,0.001, 0.001,0.001,0.001];
+                    let t, v;
+                    if (i === 0) {
+                        t = [0, frameDelay, totalDuration];
+                        v = [1,1,1, 0.001,0.001,0.001, 0.001,0.001,0.001];
+                    } else {
+                        t = [0, i * frameDelay, (i + 1) * frameDelay, totalDuration];
+                        v = [0.001,0.001,0.001, 1,1,1, 0.001,0.001,0.001, 0.001,0.001,0.001];
+                    }
                     
                     const track = new THREE.VectorKeyframeTrack(mesh.name + '.scale', t, v, THREE.InterpolateDiscrete);
                     tracks.push(track);
-
-                    currentTime += frameDelay;
                 }
 
                 const clip = new THREE.AnimationClip("PlayGif", totalDuration, tracks);
+
                 const exporter = new THREE.GLTFExporter();
                 exporter.parse(scene, function(gltf) {
                     const blob = new Blob([gltf], { type: 'model/gltf-binary' });
                     currentBlobUrl = URL.createObjectURL(blob);
-                    btn.download = file.name.replace(/\.[^/.]+$/, "") + " (ChickenGunGif).glb";
+                    const originalName = file.name.replace(/\.[^/.]+$/, "");
+                    
+                    btn.download = originalName + " (ChickenGunGif).glb";
+                    
+                    // VOLVER AL ESTADO DE DESCARGA
                     btn.style.pointerEvents = "auto";
                     btn.style.background = "#27ae60";
                     btn.innerText = translations[lang].btn;
+
                     document.body.removeChild(imgEl); 
                 }, { binary: true, animations: [clip] });
             });
@@ -237,8 +251,9 @@
     </script>
 
     <footer>
-        Made by <a href="https://youtube.com/@eiteeyt?si=akPUdnEfXM-oORH5" target="_blank">Eitee</a> <333
+        <span id="footerLabel">Made by</span> <a href="https://youtube.com/@eiteeyt?si=akPUdnEfXM-oORH5" target="_blank">Eitee</a> <333
     </footer>
+
 </body>
         </html>
             
