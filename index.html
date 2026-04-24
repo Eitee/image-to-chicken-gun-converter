@@ -6,14 +6,16 @@
     <title>Chicken Gun Converter</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/GLTFExporter.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/buzzfeed/libgif-js/libgif.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px 20px; background-color: #1a1a1a; color: #ffffff; text-align: center; }
         h1 { color: #f1c40f; text-transform: uppercase; letter-spacing: 2px; text-shadow: 2px 2px #000; }
         .instrucciones { background: #333; padding: 20px; border-radius: 10px; max-width: 600px; margin: 20px auto; line-height: 1.6; border: 1px solid #444; }
-        .btn { display: inline-block; padding: 18px 30px; background: #27ae60; color: white; border-radius: 50px; font-weight: bold; margin-top: 25px; display: none; text-decoration: none; font-size: 1.1em; box-shadow: 0 4px #1e8449; cursor: pointer; }
+        .btn { display: inline-block; padding: 18px 30px; background: #27ae60; color: white; border-radius: 50px; font-weight: bold; margin-top: 25px; display: none; text-decoration: none; font-size: 1.1em; box-shadow: 0 4px #1e8449; cursor: pointer; transition: background 0.3s; }
         .btn:active { transform: translateY(2px); box-shadow: 0 2px #1e8449; }
         input[type="file"] { background: #f1c40f; padding: 15px; border-radius: 5px; color: #000; font-weight: bold; cursor: pointer; }
         #statusMsg { margin-top: 20px; color: #2ecc71; font-weight: bold; display: none; font-size: 1.2em; }
+        .disclaimer { font-size: 0.85em; color: #aaa; margin-top: 10px; font-style: italic; opacity: 0.8; }
         footer { margin-top: 50px; color: #777; font-size: 1.1em; }
         footer a { color: #f1c40f; text-decoration: none; font-weight: bold; }
         footer a:hover { text-decoration: underline; }
@@ -21,43 +23,54 @@
 </head>
 <body>
 
-    <h1 id="title">Convert Image For Chicken Gun!</h1>
+    <h1 id="title">CONVERTIR IMAGEN A CHICKEN GUN</h1>
     
     <div class="instrucciones" id="instructions">
-        Upload your image here to use it in Chicken Gun. 
-        <br>Inside the game, go to <b>"Load 3D Model"</b>, select the file, and your image will be in the game!
-    </div>
+        </div>
     
-    <input type="file" id="imageInput" accept="image/png, image/jpeg">
+    <input type="file" id="imageInput" accept="image/png, image/jpeg, image/gif">
+    <div id="gifDisclaimer" class="disclaimer"></div>
     <br>
     
-    <a id="downloadBtn" class="btn">CONVERT IMAGE TO CHICKEN GUN</a>
+    <a id="downloadBtn" class="btn">DESCARGAR MODELO</a>
 
-    <div id="statusMsg">Image converted! Thanks for using</div>
+    <div id="statusMsg"></div>
 
     <canvas id="conversionCanvas" style="display:none;"></canvas>
 
     <script>
         const translations = {
             en: {
-                title: "Convert Image For Chicken Gun!",
-                instr: 'Upload your image here to use it in Chicken Gun. <br>Inside the game, go to <b>"Load 3D Model"</b>, select the file, and your image will be in the game!',
-                btn: "CONVERT IMAGE TO CHICKEN GUN",
-                status: "Image converted! Thanks for using",
+                title: "CONVERT IMAGE TO CHICKEN GUN",
+                instr: 'Upload your image or GIF here to use it in Chicken Gun. <br>Inside the game, go to <b>"Load 3D Model"</b>, select the file, and your image/gif will be in the game!',
+                btn: "DOWNLOAD MODEL",
+                disclaimer: "* GIFs are in beta and may be unstable.",
+                status_img: "Image converted, thanks for using!",
+                status_gif: "Gif converted, thanks for using!!",
+                processing_img: "PROCESSING IMAGE... PLEASE WAIT",
+                processing_gif: "PROCESSING GIF... PLEASE WAIT",
                 madeBy: "Made by"
             },
             es: {
-                title: "¡Convertir Imagen Para Chicken Gun!",
-                instr: 'Coloca tu imagen aquí y automáticamente la podrás usar en Chicken Gun. <br>Dentro del juego, le das a <b>"Load 3D Model"</b>, seleccionas el archivo y ¡ya tendrás tu imagen dentro de Chicken Gun!',
-                btn: "CONVERTIR IMAGEN A CHICKEN GUN",
-                status: "¡Imagen convertida! Gracias por usar",
+                title: "CONVERTIR IMAGEN A CHICKEN GUN",
+                instr: 'Coloca tu imagen o GIF aquí y automáticamente lo podrás usar en Chicken Gun. <br>Dentro del juego, le das a <b>"Load 3D Model"</b>, seleccionas el archivo y ¡ya tendrás tu imagen/gif dentro de Chicken Gun!',
+                btn: "DESCARGAR MODELO",
+                disclaimer: "* Los GIFs están en beta y pueden ser inestables.",
+                status_img: "¡Imagen convertida, gracias por usar!",
+                status_gif: "¡Gif convertido, gracias por usar!!",
+                processing_img: "PROCESANDO IMAGEN... ESPERA",
+                processing_gif: "PROCESANDO GIF... ESPERA",
                 madeBy: "Hecho por"
             },
             ru: {
-                title: "Конвертировать изображение для Chicken Gun!",
-                instr: 'Загрузите изображение здесь, чтобы использовать его в Chicken Gun. <br>В игре нажмите <b>"Load 3D Model"</b>, выберите файл, и ваше изображение появится в игре!',
-                btn: "КОНВЕРТИРОВАТЬ В CHICKEN GUN",
-                status: "Изображение конвертировано! Спасибо за использование",
+                title: "КОНВЕРТИРОВАТЬ ИЗОБРАЖЕНИЕ В CHICKEN GUN",
+                instr: 'Загрузите изображение или GIF здесь, чтобы использовать его в Chicken Gun. <br>В игре нажмите <b>"Load 3D Model"</b>, выберите файл, и ваше изображение/GIF появится в игре!',
+                btn: "СКАЧАТЬ МОДЕЛЬ",
+                disclaimer: "* GIF-файлы находятся в бета-версии и могут быть нестабильными.",
+                status_img: "Изображение конвертировано, спасибо за использование!",
+                status_gif: "GIF конвертирован, спасибо за использование!!",
+                processing_img: "ОБРАБОТКА ИЗОБРАЖЕНИЯ... ПОДОЖДИТЕ",
+                processing_gif: "ОБРАБОТКА GIF... ПОДОЖДИТЕ",
                 madeBy: "Сделано"
             }
         };
@@ -68,12 +81,13 @@
         document.getElementById('title').innerText = translations[lang].title;
         document.getElementById('instructions').innerHTML = translations[lang].instr;
         document.getElementById('downloadBtn').innerText = translations[lang].btn;
-        document.getElementById('statusMsg').innerText = translations[lang].status;
+        document.getElementById('gifDisclaimer').innerText = translations[lang].disclaimer;
         
         const footerLabel = document.getElementById('footerLabel');
         if(footerLabel) footerLabel.innerText = translations[lang].madeBy;
 
         let currentBlobUrl = null;
+        let isGif = false;
 
         document.getElementById('imageInput').addEventListener('change', function(event) {
             const file = event.target.files[0];
@@ -81,6 +95,23 @@
 
             document.getElementById('downloadBtn').style.display = 'none';
             document.getElementById('statusMsg').style.display = 'none';
+
+            if (file.type === 'image/gif') {
+                isGif = true;
+                processGIF(file);
+            } else {
+                isGif = false;
+                processStaticImage(file);
+            }
+        });
+
+        function processStaticImage(file) {
+            // MOSTRAR ESTADO DE PROCESAMIENTO PARA IMAGEN
+            const btn = document.getElementById('downloadBtn');
+            btn.innerText = translations[lang].processing_img;
+            btn.style.background = "#e67e22"; // Naranja
+            btn.style.pointerEvents = "none";
+            btn.style.display = 'inline-block';
 
             const img = new Image();
             img.src = URL.createObjectURL(file);
@@ -109,17 +140,113 @@
                 exporter.parse(scene, function(gltf) {
                     const blob = new Blob([gltf], { type: 'model/gltf-binary' });
                     currentBlobUrl = URL.createObjectURL(blob);
-                    const btn = document.getElementById('downloadBtn');
+                    
                     const originalName = file.name.replace(/\.[^/.]+$/, "");
-                    btn.download = originalName + " (Chicken Gun Image).glb";
-                    btn.style.display = 'inline-block';
+                    btn.download = originalName + " (ChickenGunImage).glb";
+                    
+                    // VOLVER AL ESTADO DE DESCARGA
+                    btn.style.pointerEvents = "auto";
+                    btn.style.background = "#27ae60"; // Verde
+                    btn.innerText = translations[lang].btn;
                 }, { binary: true });
             };
-        });
+        }
+
+        function processGIF(file) {
+            const blobUrl = URL.createObjectURL(file);
+            const imgEl = document.createElement('img');
+            imgEl.src = blobUrl;
+            imgEl.setAttribute('rel:animated_src', blobUrl);
+            imgEl.style.display = 'none';
+            document.body.appendChild(imgEl);
+
+            const btn = document.getElementById('downloadBtn');
+            btn.innerText = translations[lang].processing_gif;
+            btn.style.background = "#e67e22";
+            btn.style.pointerEvents = "none";
+            btn.style.display = 'inline-block';
+
+            const gifPlayer = new SuperGif({ gif: imgEl, auto_play: false });
+            
+            gifPlayer.load(function() {
+                const length = gifPlayer.get_length();
+                const scene = new THREE.Scene();
+                const rootGroup = new THREE.Group();
+                rootGroup.name = "AnimatedGIF";
+                scene.add(rootGroup);
+
+                const tracks = [];
+                const frameDelay = 0.1; 
+                const totalDuration = length * frameDelay;
+
+                gifPlayer.move_to(0);
+                const canvasW = gifPlayer.get_canvas().width;
+                const canvasH = gifPlayer.get_canvas().height;
+                const aspect = canvasW / canvasH;
+                const geometry = new THREE.BoxGeometry(aspect, 1, 0.15);
+                const edgeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+                for(let i = 0; i < length; i++) {
+                    gifPlayer.move_to(i);
+                    const frameCanvas = document.createElement('canvas');
+                    frameCanvas.width = canvasW;
+                    frameCanvas.height = canvasH;
+                    const fCtx = frameCanvas.getContext('2d');
+                    
+                    fCtx.fillStyle = "#FFFFFF";
+                    fCtx.fillRect(0, 0, canvasW, canvasH);
+                    fCtx.drawImage(gifPlayer.get_canvas(), 0, 0);
+
+                    const tex = new THREE.CanvasTexture(frameCanvas);
+                    const material = new THREE.MeshBasicMaterial({ map: tex, transparent: false });
+                    const materials = [edgeMat, edgeMat, edgeMat, edgeMat, material, material];
+
+                    const mesh = new THREE.Mesh(geometry, materials);
+                    mesh.name = "Frame_" + i;
+                    
+                    if(i > 0) mesh.scale.set(0.001, 0.001, 0.001);
+                    mesh.position.z = i * 0.0001; 
+
+                    rootGroup.add(mesh);
+
+                    let t, v;
+                    if (i === 0) {
+                        t = [0, frameDelay, totalDuration];
+                        v = [1,1,1, 0.001,0.001,0.001, 0.001,0.001,0.001];
+                    } else {
+                        t = [0, i * frameDelay, (i + 1) * frameDelay, totalDuration];
+                        v = [0.001,0.001,0.001, 1,1,1, 0.001,0.001,0.001, 0.001,0.001,0.001];
+                    }
+                    
+                    const track = new THREE.VectorKeyframeTrack(mesh.name + '.scale', t, v, THREE.InterpolateDiscrete);
+                    tracks.push(track);
+                }
+
+                const clip = new THREE.AnimationClip("PlayGif", totalDuration, tracks);
+
+                const exporter = new THREE.GLTFExporter();
+                exporter.parse(scene, function(gltf) {
+                    const blob = new Blob([gltf], { type: 'model/gltf-binary' });
+                    currentBlobUrl = URL.createObjectURL(blob);
+                    const originalName = file.name.replace(/\.[^/.]+$/, "");
+                    
+                    btn.download = originalName + " (ChickenGunGif).glb";
+                    
+                    // VOLVER AL ESTADO DE DESCARGA
+                    btn.style.pointerEvents = "auto";
+                    btn.style.background = "#27ae60";
+                    btn.innerText = translations[lang].btn;
+
+                    document.body.removeChild(imgEl); 
+                }, { binary: true, animations: [clip] });
+            });
+        }
 
         document.getElementById('downloadBtn').addEventListener('click', function() {
             this.href = currentBlobUrl;
-            document.getElementById('statusMsg').style.display = 'block';
+            const statusEl = document.getElementById('statusMsg');
+            statusEl.innerText = isGif ? translations[lang].status_gif : translations[lang].status_img;
+            statusEl.style.display = 'block';
         });
     </script>
 
