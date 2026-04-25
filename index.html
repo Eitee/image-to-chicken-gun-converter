@@ -106,10 +106,9 @@
         });
 
         function processStaticImage(file) {
-            // MOSTRAR ESTADO DE PROCESAMIENTO PARA IMAGEN
             const btn = document.getElementById('downloadBtn');
             btn.innerText = translations[lang].processing_img;
-            btn.style.background = "#e67e22"; // Naranja
+            btn.style.background = "#e67e22";
             btn.style.pointerEvents = "none";
             btn.style.display = 'inline-block';
 
@@ -144,9 +143,8 @@
                     const originalName = file.name.replace(/\.[^/.]+$/, "");
                     btn.download = originalName + " (ChickenGunImage).glb";
                     
-                    // VOLVER AL ESTADO DE DESCARGA
                     btn.style.pointerEvents = "auto";
-                    btn.style.background = "#27ae60"; // Verde
+                    btn.style.background = "#27ae60";
                     btn.innerText = translations[lang].btn;
                 }, { binary: true });
             };
@@ -176,7 +174,8 @@
                 scene.add(rootGroup);
 
                 const tracks = [];
-                const frameDelay = 0.1; 
+                // CAMBIADO A 15 FPS (1 / 15 = 0.0667)
+                const frameDelay = 0.0667; 
                 const totalDuration = length * frameDelay;
 
                 gifPlayer.move_to(0);
@@ -232,7 +231,6 @@
                     
                     btn.download = originalName + " (ChickenGunGif).glb";
                     
-                    // VOLVER AL ESTADO DE DESCARGA
                     btn.style.pointerEvents = "auto";
                     btn.style.background = "#27ae60";
                     btn.innerText = translations[lang].btn;
